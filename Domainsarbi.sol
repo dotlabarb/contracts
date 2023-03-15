@@ -8,7 +8,7 @@ import {StringUtils} from "./libraries/StringUtils.sol";
 import {Base64} from "./libraries/Base64.sol";
 
 
-contract Domainsarbi is ERC721URIStorage {
+contract Dotlabarbi is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     address payable public owner;
@@ -25,6 +25,7 @@ contract Domainsarbi is ERC721URIStorage {
     error Unauthorized();
     error AlreadyRegistered();
     error InvalidName(string name);
+    error Uname(string name);
 
     modifier onlyOwner() {
         require(isOwner());
@@ -68,6 +69,7 @@ contract Domainsarbi is ERC721URIStorage {
     function register(string calldata name) public payable {
         if (domains[name] != address(0)) revert AlreadyRegistered();
         if (!valid(name)) revert InvalidName(name);
+        if (!check(name)) revert Uname(name);
 
         uint256 _price = price(name);
         require(msg.value >= _price, "Not enough ETH paid");
@@ -146,6 +148,19 @@ contract Domainsarbi is ERC721URIStorage {
     }
 
     function valid(string calldata name) public pure returns (bool) {
-        return StringUtils.strlen(name) >= 1 && StringUtils.strlen(name) <= 10;
+        return StringUtils.strlen(name) >= 1 && StringUtils.strlen(name) <= 20;
     }
+
+    function check(string memory str) public pure returns (bool) {
+    bytes memory strBytes = bytes(str);
+    bytes1 uppercaseFlag = 0x00;
+    for (uint i = 0; i < strBytes.length; i++) {
+        bytes1 charByte = strBytes[i];
+        if (charByte >= 0x41 && charByte <= 0x5A) {
+            uppercaseFlag = 0x01;
+            break;
+        }
+    }
+    return (uppercaseFlag == 0x00);
+}
 }
